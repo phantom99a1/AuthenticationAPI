@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using MailKit.Net.Smtp;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using MimeKit;
 using System.Text;
 
 namespace EmailConfirmation.Controllers
@@ -40,17 +42,43 @@ namespace EmailConfirmation.Controllers
             builder.AppendLine("<html>");
             builder.AppendLine("<body>");
             builder.AppendLine($"<p>Dear {email},</p>");
-            builder.AppendLine("<html>");
-            builder.AppendLine("<html>");
-            builder.AppendLine("<html>");
-            builder.AppendLine("<html>");
-            builder.AppendLine("<html>");
-            builder.AppendLine("<html>");
-            builder.AppendLine("<html>");
-            builder.AppendLine("<html>");
-            builder.AppendLine("<html>");
+            builder.AppendLine("<p>Thank you for registering with us. To verify your email address, please use the following verification code:</p>");
+            builder.AppendLine($"<h2>Verification Code: {emailCode}</h2>");
+            builder.AppendLine("<p>Please enter this code on our website to complete the registration.</p>");
+            builder.AppendLine("<p>If you did not request this, please ignore this email.</p>");
+            builder.AppendLine("<br>");
+            builder.AppendLine("<p>Best regard,</p>");
+            builder.AppendLine("<p><strong>Phantom</strong></p>");
+            builder.AppendLine("</body>");
+            builder.AppendLine("</html>");
 
-            return builder.ToString();
+            var message = builder.ToString();
+            var _email = new MimeMessage();
+            _email.To.Add(MailboxAddress.Parse(""));
+            _email.From.Add(MailboxAddress.Parse(""));
+            _email.Subject = "Email Confirmation";
+            _email.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = message };
+            using var smtp = new SmtpClient();
+            smtp.Connect("", , MailKit.Security.SecureSocketOptions.StartTls);
+            smtp.Authenticate("", "");
+            smtp.Send(_email);
+            smtp.Disconnect(true);
+            return "Thank you for your registration, kindly check your email for confirmation code";
+        }
+
+        [HttpPost]
+        [Route("confirmation/{email}/{code:int}")]
+        public async Task<IActionResult> Confirmation(string email, int code)
+        {
+            if (string.IsNullOrEmpty(email) || code <= 0)
+                return BadRequest("Invalid code provider");
+            var user =await GetUser(email);
+            if (user == null) return BadRequest("Invalid identity provider");
+
+            var result = await userManager.ConfirmEmailAsync(user, code.ToString());
+            return !result.Succeeded ? BadRequest("Invalid code provider")
+                : Ok("Email confirmed successfully, you can proceed to login");
+
         }
 
         private async Task<IdentityUser?> GetUser(string email) => await userManager.FindByEmailAsync(email);
