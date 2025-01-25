@@ -92,7 +92,7 @@
               "RelativeDocumentMoniker": "Controllers\\AccountController.cs",
               "ToolTip": "D:\\Authentication API\\EmailConfirmation\\Controllers\\AccountController.cs",
               "RelativeToolTip": "Controllers\\AccountController.cs",
-              "ViewState": "AQIAAEcAAAAAAAAAAAAgwE8AAABMAAAA",
+              "ViewState": "AQIAACoAAAAAAAAAAAAMwHwAAABXAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-01-23T15:20:31.376Z",
               "EditorCaption": ""
@@ -105,9 +105,10 @@
               "RelativeDocumentMoniker": "Program.cs",
               "ToolTip": "D:\\Authentication API\\EmailConfirmation\\Program.cs",
               "RelativeToolTip": "Program.cs",
-              "ViewState": "AQIAABoAAAAAAAAAAAAnwDUAAAAXAAAA",
+              "ViewState": "AQIAAA4AAAAAAAAAAAAnwBwAAABNAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-23T14:52:35.874Z"
+              "WhenOpened": "2025-01-23T14:52:35.874Z",
+              "EditorCaption": ""
             }
           ]
         }

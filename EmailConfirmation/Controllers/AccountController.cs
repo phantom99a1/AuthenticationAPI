@@ -1,7 +1,12 @@
 ﻿using MailKit.Net.Smtp;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using MimeKit;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 
 namespace EmailConfirmation.Controllers
@@ -81,6 +86,42 @@ namespace EmailConfirmation.Controllers
 
         }
 
+        [HttpPost]
+        [Route("login/{email}/{password}")]
+        public async Task<IActionResult> Login(string email, string password)
+        {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            {
+                return BadRequest();
+            }
+            var user = await GetUser(email);
+            bool isEmailConfirmed = await userManager.IsEmailConfirmedAsync(user!);
+            if (!isEmailConfirmed)
+            {
+                return BadRequest("You need to confirm email before logginning in");
+            }
+            return Ok(new[] { "Login Successfully", GenerateToken(user) });
+        }
+
+        private string GenerateToken(IdentityUser? user)
+        {
+            byte[] key = Encoding.ASCII.GetBytes("VtzRpiXT4kU95jvHYrW8v06n2839myaP");
+            var securityKey = new SymmetricSecurityKey(key);
+            var credential = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user!.Id),
+                new Claim(JwtRegisteredClaimNames.Email, user!.Email!),
+            };
+
+            var token = new JwtSecurityToken
+                (issuer: null, audience: null, claims: claims, expires: null, signingCredentials: credential);
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
         private async Task<IdentityUser?> GetUser(string email) => await userManager.FindByEmailAsync(email);
+
+        [HttpGet("protected")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public string GetMessage() => "This message is coming from protected endpoint";
     }
 }
